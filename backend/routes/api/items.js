@@ -22,6 +22,7 @@ router.param("item", function(req, res, next, slug) {
     .catch(next);
 });
 
+
 router.param("comment", function(req, res, next, id) {
   Comment.findById(id)
     .then(function(comment) {
@@ -40,29 +41,33 @@ router.get("/", auth.optional, function(req, res, next) {
   var query = {};
   var limit = 100;
   var offset = 0;
-
+  var title = '';
   if (typeof req.query.limit !== "undefined") {
     limit = req.query.limit;
   }
-
   if (typeof req.query.offset !== "undefined") {
-    offset = req.query.offset;
+    offset = req.query.offset;      
   }
-
   if (typeof req.query.tag !== "undefined") {
     query.tagList = { $in: [req.query.tag] };
+  }
+  if (typeof req.query.title !== "undefined") {
+    title = req.query.title;
   }
 
   Promise.all([
     req.query.seller ? User.findOne({ username: req.query.seller }) : null,
-    req.query.favorited ? User.findOne({ username: req.query.favorited }) : null
+    req.query.favorited ? User.findOne({ username: req.query.favorited }) : null,
   ])
     .then(function(results) {
       var seller = results[0];
       var favoriter = results[1];
-
+      console.log(results);
       if (seller) {
         query.seller = seller._id;
+      }
+      if(title){
+       query.title = title;
       }
 
       if (favoriter) {
